@@ -105,9 +105,23 @@ for DOC_FILE in README.md guide/README.md; do
   fi
 done
 
+# --- Sync distribution files from .claude/ ---
+echo ""
+echo "[3/7] Syncing distribution files from .claude/"
+if [[ -d ".claude/commands/autoresearch" ]]; then
+  cp .claude/commands/autoresearch.md commands/autoresearch.md 2>/dev/null || true
+  cp .claude/commands/autoresearch/*.md commands/autoresearch/
+  echo "    Synced commands/autoresearch/"
+fi
+if [[ -d ".claude/skills/autoresearch" ]]; then
+  cp .claude/skills/autoresearch/SKILL.md skills/autoresearch/SKILL.md
+  cp .claude/skills/autoresearch/references/*.md skills/autoresearch/references/
+  echo "    Synced skills/autoresearch/"
+fi
+
 # --- Doc review prompt ---
 echo ""
-echo "[3/6] Documentation review"
+echo "[4/7] Documentation review"
 echo "────────────────────────────────────────"
 echo "  Before continuing, review these files for accuracy:"
 echo ""
@@ -139,7 +153,7 @@ fi
 
 # --- Commit all release changes ---
 echo ""
-echo "[4/6] Committing release changes"
+echo "[5/7] Committing release changes"
 git add -A
 if git diff --cached --quiet; then
   echo "    No changes to commit."
@@ -149,7 +163,7 @@ fi
 
 # --- Push branch and create PR ---
 echo ""
-echo "[5/6] Pushing branch and creating PR"
+echo "[6/7] Pushing branch and creating PR"
 git push -u origin "$BRANCH"
 
 # Build PR body with changelog
@@ -195,7 +209,7 @@ echo "  PR created: $PR_URL"
 echo ""
 
 # --- Wait for merge confirmation ---
-echo "[6/6] Waiting for merge confirmation"
+echo "[7/7] Waiting for merge confirmation"
 echo "────────────────────────────────────────"
 echo "  Review the PR: $PR_URL"
 echo ""
