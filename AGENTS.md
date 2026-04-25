@@ -31,6 +31,16 @@ python3 plugins/autoresearch/scripts/install_local_plugin.py
 
 Use the wrapper CLI: `bin/autoresearch <subcommand> [flags]`
 
+### Cursor (mhadifilms fork)
+
+```bash
+git clone https://github.com/mhadifilms/autoresearch.git
+cd autoresearch
+./scripts/install.sh --cursor --global   # or --local
+```
+
+All commands become available as `/autoresearch` and `/autoresearch-<subcommand>` (hyphens, not colons — Cursor slash-command filenames can't contain `:`).
+
 ### Manual (any agent)
 
 Copy the skill files into your agent's skill directory:
@@ -45,6 +55,10 @@ cp autoresearch/claude-plugin/commands/autoresearch.md .claude/commands/autorese
 
 # Codex
 cp -r autoresearch/plugins/autoresearch ~/.agents/plugins/autoresearch
+
+# Cursor (mhadifilms fork)
+cp -r autoresearch/cursor-plugin/skills/autoresearch ~/.cursor/skills/autoresearch
+cp autoresearch/cursor-plugin/commands/autoresearch*.md ~/.cursor/commands/
 ```
 
 ---
@@ -296,6 +310,14 @@ iteration  commit   metric  delta   status    description
 - Wrapper CLI: `bin/autoresearch <subcommand> [flags]`
 - Canonical command spec: `plugins/autoresearch/resources/autoresearch-command-spec.json`
 
+### Cursor (mhadifilms fork)
+
+- Commands are invoked as slash commands: `/autoresearch` and `/autoresearch-<subcommand>` (hyphens — no colon namespace in Cursor)
+- Slash-command files live in `~/.cursor/commands/` (global) or `.cursor/commands/` (project)
+- Skill is auto-discovered from `~/.cursor/skills/autoresearch/` (global) or `.cursor/skills/autoresearch/` (project)
+- Interactive setup: agent asks conversationally (no `AskUserQuestion` tool in Cursor)
+- Package lives at `cursor-plugin/` with `skills/autoresearch/` and `commands/autoresearch*.md`
+
 ### Other Agents (OpenCode, Gemini CLI, etc.)
 
 - Read this file for the command surface and configuration contract
@@ -321,6 +343,9 @@ autoresearch/
 │   ├── skills/autoresearch/SKILL.md   ← Codex skill router + references/
 │   ├── resources/                     ← Command spec JSON
 │   └── scripts/                       ← Wrapper CLI
+├── cursor-plugin/                     ← Cursor distribution package (mhadifilms fork)
+│   ├── skills/autoresearch/SKILL.md   ← Main skill + references/
+│   └── commands/autoresearch*.md      ← Flat slash commands (hyphen naming)
 └── bin/autoresearch                   ← Convenience wrapper
 ```
 

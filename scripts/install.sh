@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Autoresearch installer — supports Claude Code and OpenCode, local or global.
+# Autoresearch installer — supports Claude Code, OpenCode, Codex, and Cursor, local or global.
 
 set -euo pipefail
 
@@ -22,6 +22,7 @@ Options:
   --claude            Install for Claude Code
   --opencode          Install for OpenCode
   --codex             Install for OpenAI Codex
+  --cursor            Install for Cursor
   -g, --global        Install globally
   -l, --local         Install in the current project
   -c, --config-dir    Override the global config directory
@@ -33,6 +34,7 @@ Examples:
   ./scripts/install.sh --claude --global
   ./scripts/install.sh --opencode --local
   ./scripts/install.sh --codex --global
+  ./scripts/install.sh --cursor --global
 EOF
 }
 
@@ -61,6 +63,9 @@ parse_args() {
       --codex)
         if [[ -n "$TOOL" && "$TOOL" != "codex" ]]; then die "choose only one tool"; fi
         TOOL="codex" ;;
+      --cursor)
+        if [[ -n "$TOOL" && "$TOOL" != "cursor" ]]; then die "choose only one tool"; fi
+        TOOL="cursor" ;;
       -g|--global)
         if [[ -n "$LOCATION" && "$LOCATION" != "global" ]]; then die "choose --global or --local"; fi
         LOCATION="global" ;;
@@ -103,6 +108,9 @@ get_global_dir() {
     codex)
       if [[ -n "${CODEX_HOME:-}" ]]; then expand_path "$CODEX_HOME"
       else printf '%s\n' "$HOME/.agents"; fi ;;
+    cursor)
+      if [[ -n "${CURSOR_CONFIG_DIR:-}" ]]; then expand_path "$CURSOR_CONFIG_DIR"
+      else printf '%s\n' "$HOME/.cursor"; fi ;;
   esac
 }
 
@@ -113,6 +121,7 @@ get_target_dir() {
       claude) printf '%s\n' "$PWD/.claude" ;;
       opencode) printf '%s\n' "$PWD/.opencode" ;;
       codex) printf '%s\n' "$PWD/.agents" ;;
+      cursor) printf '%s\n' "$PWD/.cursor" ;;
     esac
     return
   fi
@@ -121,12 +130,13 @@ get_target_dir() {
 
 prompt_tool() {
   local answer
-  printf 'Select the tool to install:\n  1) Claude Code\n  2) OpenCode\n  3) OpenAI Codex\nChoice [1]: '
+  printf 'Select the tool to install:\n  1) Claude Code\n  2) OpenCode\n  3) OpenAI Codex\n  4) Cursor\nChoice [1]: '
   read -r answer || cancelled
   case "${answer:-1}" in
     1) TOOL="claude" ;;
     2) TOOL="opencode" ;;
     3) TOOL="codex" ;;
+    4) TOOL="cursor" ;;
     *) die "invalid selection: $answer" ;;
   esac
 }
@@ -134,7 +144,7 @@ prompt_tool() {
 prompt_location() {
   local global_dir answer local_dir
   global_dir="$(get_global_dir "$TOOL")"
-  case "$TOOL" in claude) local_dir="$PWD/.claude" ;; opencode) local_dir="$PWD/.opencode" ;; codex) local_dir="$PWD/.agents" ;; esac
+  case "$TOOL" in claude) local_dir="$PWD/.claude" ;; opencode) local_dir="$PWD/.opencode" ;; codex) local_dir="$PWD/.agents" ;; cursor) local_dir="$PWD/.cursor" ;; esac
   printf 'Install location:\n  1) Global (%s)\n  2) Local  (%s)\nChoice [1]: ' "$global_dir" "$local_dir"
   read -r answer || cancelled
   case "${answer:-1}" in
@@ -200,6 +210,17 @@ install_codex() {
   sync_dir "$REPO_ROOT/.agents/skills/autoresearch" "$t/skills/autoresearch"
 }
 
+install_cursor() {
+  local t="$1" src
+  mkdir -p "$t/skills" "$t/commands"
+  sync_dir "$REPO_ROOT/cursor-plugin/skills/autoresearch" "$t/skills/autoresearch"
+  for src in "$REPO_ROOT"/cursor-plugin/commands/autoresearch*.md; do
+    if [[ -f "$src" ]]; then
+      sync_file "$src" "$t/commands/$(basename "$src")"
+    fi
+  done
+}
+
 main() {
   parse_args "$@"
   ensure_context
@@ -208,17 +229,19 @@ main() {
   confirm_overwrite "$target_root"
 
   local label
-  case "$TOOL" in claude) label="Claude Code" ;; opencode) label="OpenCode" ;; codex) label="OpenAI Codex" ;; esac
+  case "$TOOL" in claude) label="Claude Code" ;; opencode) label="OpenCode" ;; codex) label="OpenAI Codex" ;; cursor) label="Cursor" ;; esac
   printf 'Installing Autoresearch for %s (%s)\nTarget: %s\n' "$label" "$LOCATION" "$target_root"
 
   case "$TOOL" in
     claude) install_claude "$target_root" ;;
     opencode) install_opencode "$target_root" ;;
     codex) install_codex "$target_root" ;;
+    cursor) install_cursor "$target_root" ;;
   esac
 
   case "$TOOL" in
     codex) printf 'Done. Use $autoresearch in Codex to start.\n' ;;
+    cursor) printf 'Done. Run /autoresearch (or /autoresearch-plan, -debug, -fix, -security, -ship, -scenario, -predict, -learn, -reason) in Cursor to start.\n' ;;
     *) printf 'Done. Run /autoresearch to start.\n' ;;
   esac
 }

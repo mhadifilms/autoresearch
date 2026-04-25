@@ -2,13 +2,16 @@
 
 # Autoresearch
 
-**Turn [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenCode](https://opencode.ai), or [OpenAI Codex](https://developers.openai.com/codex) into a relentless improvement engine.**
+**Turn [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenCode](https://opencode.ai), [OpenAI Codex](https://developers.openai.com/codex), or [Cursor](https://cursor.com) into a relentless improvement engine.**
 
 Based on [Karpathy's autoresearch](https://github.com/karpathy/autoresearch) — constraint + mechanical metric + autonomous iteration = compounding gains.
+
+> **mhadifilms fork:** adds a first-class Cursor package (`cursor-plugin/`, `.cursor/`, `--cursor` installer flag, hyphen-namespaced slash commands). Upstream unchanged otherwise.
 
 [![Claude Code Skill](https://img.shields.io/badge/Claude_Code-Skill-blue?logo=anthropic&logoColor=white)](https://docs.anthropic.com/en/docs/claude-code)
 [![OpenCode](https://img.shields.io/badge/OpenCode-Skill-purple)](https://opencode.ai)
 [![Codex](https://img.shields.io/badge/Codex-Skill-green?logo=openai&logoColor=white)](https://developers.openai.com/codex)
+[![Cursor](https://img.shields.io/badge/Cursor-Skill-black?logo=cursor&logoColor=white)](https://cursor.com)
 [![Version](https://img.shields.io/badge/version-2.0.0--beta.0.2-blue.svg)](https://github.com/uditgoenka/autoresearch/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -22,7 +25,7 @@ Based on [Karpathy's autoresearch](https://github.com/karpathy/autoresearch) —
 
 *You don't need AGI. You need a goal, a metric, and a loop that never quits.*
 
-**Now supports Claude Code, OpenCode, and OpenAI Codex.**
+**Now supports Claude Code, OpenCode, OpenAI Codex, and Cursor.**
 
 <br>
 
@@ -253,6 +256,32 @@ cp -r autoresearch/.agents/skills/autoresearch ~/.agents/skills/autoresearch
 ```
 
 > **Codex invocation:** Use `$autoresearch` mention syntax in your prompt. Subcommands are keywords — `$autoresearch plan`, `$autoresearch debug`, `$autoresearch security`, etc. Codex discovers skills automatically from `.agents/skills/` directories.
+
+### Cursor Quick Start
+
+**Option A — Guided installer (recommended):**
+```bash
+git clone https://github.com/mhadifilms/autoresearch.git
+cd autoresearch
+./scripts/install.sh --cursor --global
+```
+
+**Option B — Manual copy:**
+```bash
+git clone https://github.com/mhadifilms/autoresearch.git
+
+# Project install
+cp -r autoresearch/cursor-plugin/skills/autoresearch .cursor/skills/autoresearch
+cp autoresearch/cursor-plugin/commands/autoresearch*.md .cursor/commands/
+```
+
+Or install globally:
+```bash
+cp -r autoresearch/cursor-plugin/skills/autoresearch ~/.cursor/skills/autoresearch
+cp autoresearch/cursor-plugin/commands/autoresearch*.md ~/.cursor/commands/
+```
+
+> **Cursor invocation:** Slash commands live in `~/.cursor/commands/` (global) or `.cursor/commands/` (project) per [Cursor's docs](https://cursor.com/docs/cli/reference/slash-commands). Cursor doesn't support the colon-namespaced subcommand syntax used by Claude Code, so this fork uses **hyphens**: `/autoresearch`, `/autoresearch-plan`, `/autoresearch-debug`, `/autoresearch-fix`, `/autoresearch-security`, `/autoresearch-ship`, `/autoresearch-scenario`, `/autoresearch-predict`, `/autoresearch-learn`, `/autoresearch-reason`. The skill (`~/.cursor/skills/autoresearch/`) is auto-discovered by Cursor's skill loader.
 
 ### 2. Run It
 
